@@ -1,152 +1,468 @@
 ﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>متجر احترافي</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>متجر</title>
+  <meta name="description" content="متجر HTML بسيط مع لوحة إدارة، تخزين محلي، رفع صور، عربة تسوق، وتصدير/استيراد بيانات"/>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      background: #f7f7f7;
+    :root{
+      --bg:#f6f8fb;--card:#ffffff;--muted:#666;--accent:#0b74de;--radius:12px
     }
+    *{box-sizing:border-box;font-family:system-ui,Segoe UI,Roboto,Arial}
+    body{margin:0;background:var(--bg);color:#111}
 
-    header {
-      background: #111827;
-      padding: 20px;
-      color: white;
-      font-size: 24px;
-      text-align: center;
-    }
+    header{background:white;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(2,6,23,0.06);position:sticky;top:0;z-index:40}
+    .logo{font-weight:700}
+    .controls{display:flex;gap:8px;align-items:center}
+    button{cursor:pointer}
 
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
+    .container{max-width:1200px;margin:20px auto;padding:0 16px}
+    .layout{display:grid;grid-template-columns:320px 1fr;gap:18px}
 
-    .product {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      text-align: center;
-    }
+    /* لوحة الإدارة */
+    .panel{background:var(--card);padding:12px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(12,20,40,0.06)}
+    .panel h3{margin:0 0 8px}
+    .field{display:flex;flex-direction:column;margin-bottom:10px}
+    label{font-size:13px;margin-bottom:6px;color:var(--muted)}
+    input[type=text],input[type=number],textarea,select{padding:8px;border-radius:8px;border:1px solid #e6eef8}
+    textarea{min-height:80px}
+    .small{font-size:13px;color:var(--muted)}
 
-    .product img {
-      width: 100%;
-      border-radius: 10px;
-    }
+    /* متجر */
+    .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+    .card{background:var(--card);padding:12px;border-radius:12px;box-shadow:0 8px 20px rgba(12,20,40,0.04);display:flex;flex-direction:column}
+    .thumb{height:160px;border-radius:8px;background:#f0f3f8;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .thumb img{max-width:100%;max-height:100%;object-fit:contain}
+    .meta{margin-top:8px;display:flex;justify-content:space-between;align-items:center}
+    .price{font-weight:700}
+    .add{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:8px 10px;border-radius:8px}
 
-    .product button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border: none;
-      background: #2563eb;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+    /* عربة */
+    .cart-bar{position:fixed;left:20px;bottom:20px;background:var(--card);padding:10px;border-radius:12px;box-shadow:0 12px 30px rgba(2,6,23,0.12);width:340px;max-width:calc(100% - 40px)}
+    .cart-items{max-height:260px;overflow:auto;margin-bottom:8px}
+    .cart-row{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px dashed #eee}
 
-    #cart {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background: white;
-      padding: 20px;
-      width: 260px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    }
+    /* Responsive */
+    @media(max-width:980px){.layout{grid-template-columns:1fr}.cart-bar{left:50%;transform:translateX(-50%);width:92%}}
 
-    #cart h3 {
-      margin-top: 0;
-    }
-
-    #cart ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    #cart li {
-      padding: 6px 0;
-      border-bottom: 1px solid #ddd;
-    }
-
-    #checkoutBtn {
-      margin-top: 10px;
-      width: 100%;
-      padding: 10px;
-      background: #16a34a;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+    /* utilities */
+    .muted{color:var(--muted)}
+    .btn-primary{background:var(--accent);color:white;padding:8px 12px;border-radius:10px;border:none}
+    .btn-ghost{background:transparent;border:1px solid #ddd;padding:8px 10px;border-radius:8px}
+    .danger{background:#ff4d4f;color:white;padding:6px 10px;border-radius:8px;border:none}
+    .row{display:flex;gap:8px}
   </style>
 </head>
 <body>
-  <header>متجر احترافي جاهز</header>
+  <header>
+    <div class="logo">&nbsp;</div>
+    <div class="controls">
+      <button id="btnToggleAdmin" class="btn-ghost">لوحة الإدارة</button>
+      <button id="btnExport" class="btn-ghost">تصدير</button>
+      <button id="btnImport" class="btn-ghost">استيراد</button>
+    </div>
+  </header>
 
-  <div id="cart">
-    <h3>سلة المشتريات</h3>
-    <ul id="cartItems"></ul>
-    <p><strong>الإجمالي:</strong> <span id="total">0</span> $</p>
-    <button id="checkoutBtn">إتمام الطلب</button>
+  <div class="container">
+    <div class="layout">
+      <!-- لوحة الإدارة (يمكن إخفاؤها) -->
+      <aside id="adminPanel" class="panel" aria-hidden="true" style="display:none">
+        <h3>لوحة الإدارة</h3>
+
+        <div id="authSection">
+          <div class="field">
+            <label>دخول المدير</label>
+            <input type="password" id="adminPass" placeholder="أدخل كلمة المرور" />
+          </div>
+          <div class="row">
+            <button id="btnLogin" class="btn-primary">دخول</button>
+            <button id="btnLogout" class="btn-ghost" style="display:none">خروج</button>
+          </div>
+          <div class="small muted" style="margin-top:8px">كلمة المرور الافتراضية: <strong>admin123</strong> (يمكن تغييرها بعد الدخول)</div>
+        </div>
+
+        <div id="adminControls" style="display:none;margin-top:12px">
+          <h4>إضافة منتج</h4>
+          <div class="field"><label>اسم المنتج</label><input type="text" id="pTitle" /></div>
+          <div class="field"><label>السعر</label><input type="number" id="pPrice" min="0" /></div>
+          <div class="field"><label>الوصف</label><textarea id="pDesc"></textarea></div>
+          <div class="field"><label>رفع صورة</label><input type="file" id="pImage" accept="image/*" /></div>
+          <div class="row">
+            <button id="btnAdd" class="btn-primary">إضافة</button>
+            <button id="btnClearProducts" class="danger">مسح الكل</button>
+          </div>
+
+          <hr style="margin:12px 0" />
+
+          <h4>المنتجات الحالية</h4>
+          <div id="productList" style="max-height:220px;overflow:auto"></div>
+
+          <hr style="margin:12px 0" />
+
+          <h4>إعدادات المدير</h4>
+          <div class="field"><label>تغيير كلمة المرور</label><input type="password" id="newPass" placeholder="كلمة مرور جديدة" /></div>
+          <div class="row"><button id="btnChangePass" class="btn-ghost">تغيير</button></div>
+        </div>
+
+      </aside>
+
+      <!-- المتجر -->
+      <main>
+        <div class="panel">
+          <div class="toolbar">
+            <div>
+              <input type="text" id="search" placeholder="ابحث عن منتج" />
+            </div>
+            <div class="row">
+              <select id="sort">
+                <option value="new">الأحدث</option>
+                <option value="price-asc">السعر - تصاعدي</option>
+                <option value="price-desc">السعر - تنازلي</option>
+              </select>
+              <button id="btnOpenCart" class="btn-primary">عرض العربة</button>
+            </div>
+          </div>
+
+          <div id="productsGrid" class="grid"></div>
+        </div>
+      </main>
+    </div>
   </div>
 
-  <section class="products">
-    <div class="product">
-      <img src="https://via.placeholder.com/300" />
-      <h3>منتج 1</h3>
-      <p>السعر: 10$</p>
-      <button onclick="addToCart('منتج 1', 10)">أضف إلى السلة</button>
+  <!-- عربة تسوق ثابتة -->
+  <div id="cartBar" class="cart-bar" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <strong>عربة التسوق</strong>
+      <div class="row"><button id="btnCloseCart" class="btn-ghost">إغلاق</button></div>
     </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <strong>المجموع: <span id="cartTotal">0</span></strong>
+      <div class="row">
+        <button id="btnClearCart" class="btn-ghost">تفريغ</button>
+        <button id="btnCheckout" class="btn-primary">الدفع (محاكاة)</button>
+      </div>
+    </div>
+  </div>
 
-    <div class="product">
-      <img src="https://via.placeholder.com/300" />
-      <h3>منتج 2</h3>
-      <p>السعر: 20$</p>
-      <button onclick="addToCart('منتج 2', 20)">أضف إلى السلة</button>
-    </div>
-
-    <div class="product">
-      <img src="https://via.placeholder.com/300" />
-      <h3>منتج 3</h3>
-      <p>السعر: 30$</p>
-      <button onclick="addToCart('منتج 3', 30)">أضف إلى السلة</button>
-    </div>
-  </section>
+  <input type="file" id="importFile" style="display:none" accept="application/json" />
 
   <script>
-    let cart = [];
+    /*****************************************************************
+     * متجر HTML متكامل (لوحة إدارة + localStorage + رفع صور + عربة)
+     * - يدعم: إضافة/تعديل/حذف منتجات
+     * - حفظ تلقائي في localStorage
+     * - رفع صور (Base64) وتخزينها
+     * - إدارة بكلمة مرور مدير (مخزن في localStorage بشكل مشفر بسيط)
+     * - تصدير/استيراد بيانات المنتجات
+     * - دعم البحث والفرز وعرض عربة
+     *****************************************************************/
 
-    function addToCart(name, price) {
-      cart.push({ name, price });
-      updateCart();
+    // ---------- مفاتيح التخزين ----------
+    const STORAGE_PRODUCTS = 'my_store_products_v1';
+    const STORAGE_ADMIN = 'my_store_admin_v1';
+    const STORAGE_CART = 'my_store_cart_v1';
+
+    // ---------- عناصر DOM ----------
+    const adminPanel = document.getElementById('adminPanel');
+    const btnToggleAdmin = document.getElementById('btnToggleAdmin');
+    const adminControls = document.getElementById('adminControls');
+    const authSection = document.getElementById('authSection');
+
+    const adminPassInput = document.getElementById('adminPass');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnLogout = document.getElementById('btnLogout');
+    const btnAdd = document.getElementById('btnAdd');
+    const btnClearProducts = document.getElementById('btnClearProducts');
+    const productList = document.getElementById('productList');
+    const pTitle = document.getElementById('pTitle');
+    const pPrice = document.getElementById('pPrice');
+    const pDesc = document.getElementById('pDesc');
+    const pImage = document.getElementById('pImage');
+    const newPass = document.getElementById('newPass');
+    const btnChangePass = document.getElementById('btnChangePass');
+
+    const productsGrid = document.getElementById('productsGrid');
+    const searchInput = document.getElementById('search');
+    const sortSelect = document.getElementById('sort');
+
+    const cartBar = document.getElementById('cartBar');
+    const btnOpenCart = document.getElementById('btnOpenCart');
+    const btnCloseCart = document.getElementById('btnCloseCart');
+    const cartItemsEl = document.getElementById('cartItems');
+    const cartTotalEl = document.getElementById('cartTotal');
+    const btnClearCart = document.getElementById('btnClearCart');
+    const btnCheckout = document.getElementById('btnCheckout');
+
+    const btnExport = document.getElementById('btnExport');
+    const btnImport = document.getElementById('btnImport');
+    const importFile = document.getElementById('importFile');
+
+    // ---------- حالة التطبيق ----------
+    let products = loadProducts();
+    let cart = loadCart();
+    let isAdmin = false;
+
+    // ---------- تهيئة كلمة مرور افتراضية (مشوهة) ----------
+    // نحن لا نستخدم تشفير قوي هنا — هذه مجرد حماية بسيطة على مستوى الواجهة
+    function initAdmin(){
+      const stored = localStorage.getItem(STORAGE_ADMIN);
+      if(!stored){
+        // كلمة المرور الافتراضية: admin123
+        localStorage.setItem(STORAGE_ADMIN, JSON.stringify({pass: btoa('admin123')}));
+      }
+    }
+    initAdmin();
+
+    // ---------- وظائف التخزين ----------
+    function loadProducts(){
+      try{
+        const raw = localStorage.getItem(STORAGE_PRODUCTS);
+        return raw ? JSON.parse(raw) : [];
+      }catch(e){return []}
     }
 
-    function updateCart() {
-      const cartItems = document.getElementById("cartItems");
-      const total = document.getElementById("total");
-
-      cartItems.innerHTML = "";
-      let sum = 0;
-
-      cart.forEach((item) => {
-        const li = document.createElement("li");
-        li.textContent = `${item.name} - ${item.price}$`;
-        cartItems.appendChild(li);
-        sum += item.price;
-      });
-
-      total.textContent = sum;
+    function saveProducts(){
+      localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products));
     }
 
-    document.getElementById("checkoutBtn").onclick = () => {
-      alert("شكراً لك! سيتم التواصل لإتمام الطلب.");
-    };
+    function loadCart(){
+      try{ const raw = localStorage.getItem(STORAGE_CART); return raw? JSON.parse(raw): {}; }catch(e){return {}} }
+    function saveCart(){ localStorage.setItem(STORAGE_CART, JSON.stringify(cart)); }
+
+    // ---------- إدارة المنتجات ----------
+    function addProduct({title,price,desc,img}){
+      const id = Date.now();
+      products.unshift({id,title,price:Number(price),desc,img,created:id});
+      saveProducts();
+      renderProducts();
+      renderAdminList();
+    }
+
+    function updateProduct(id, payload){
+      const i = products.findIndex(p=>p.id==id); if(i===-1) return;
+      products[i] = {...products[i],...payload}; saveProducts(); renderAll();
+    }
+
+    function deleteProduct(id){ products = products.filter(p=>p.id!=id); saveProducts(); renderAll(); }
+
+    function clearProducts(){ if(confirm('هل أنت متأكد من مسح كل المنتجات؟')){ products=[]; saveProducts(); renderAll(); alert('تم المسح'); } }
+
+    // ---------- عرض المنتجات في الواجهة ----------
+    function renderProducts(){
+      const q = searchInput.value.trim().toLowerCase();
+      let list = products.slice();
+      if(q) list = list.filter(p=> (p.title||'').toLowerCase().includes(q) || (p.desc||'').toLowerCase().includes(q));
+      const sort = sortSelect.value;
+      if(sort==='price-asc') list.sort((a,b)=>a.price-b.price);
+      if(sort==='price-desc') list.sort((a,b)=>b.price-a.price);
+      if(sort==='new') list.sort((a,b)=>b.created - a.created);
+
+      productsGrid.innerHTML = '';
+      if(list.length===0){ productsGrid.innerHTML = '<div class="muted">لا توجد منتجات</div>'; return }
+
+      for(const p of list){
+        const card = document.createElement('div'); card.className='card';
+        card.innerHTML = `
+          <div class="thumb">${p.img? `<img src="${p.img}" alt=""/>` : ''}</div>
+          <div style="margin-top:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><strong>${escapeHtml(p.title||'')}</strong></div>
+              <div class="price">${formatNumber(p.price)} </div>
+            </div>
+            <div class="muted" style="margin-top:6px">${escapeHtml(p.desc||'')}</div>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;justify-content:space-between;align-items:center">
+            <button class="add" data-id="${p.id}">أضف إلى العربة</button>
+            <div style="display:flex;gap:6px">
+              ${isAdmin? `<button class="btn-ghost" data-edit="${p.id}">تعديل</button><button class="danger" data-delete="${p.id}">حذف</button>` : ''}
+            </div>
+          </div>
+        `;
+        productsGrid.appendChild(card);
+      }
+
+      // أزرار إضافة وعملية تعديل/حذف
+      productsGrid.querySelectorAll('.add').forEach(btn=> btn.addEventListener('click', e=>{ const id = e.target.dataset.id; addToCart(Number(id),1); }))
+      productsGrid.querySelectorAll('[data-delete]').forEach(b=> b.addEventListener('click', e=>{ deleteProduct(e.target.dataset.delete); }))
+      productsGrid.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', e=>{ openEdit(Number(e.target.dataset.edit)); }))
+    }
+
+    function renderAll(){ renderProducts(); renderAdminList(); saveProducts(); }
+
+    // ---------- لوحة الإدارة: قائمة المنتجات ----------
+    function renderAdminList(){
+      productList.innerHTML = '';
+      if(products.length===0){ productList.innerHTML = '<div class="muted">لا توجد منتجات</div>'; return }
+      for(const p of products){
+        const row = document.createElement('div'); row.style.padding='8px 0'; row.style.borderBottom='1px dashed #eee';
+        row.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="flex:1">
+              <div><strong>${escapeHtml(p.title||'')}</strong></div>
+              <div class="small muted">${formatNumber(p.price)}</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn-ghost" data-edit="${p.id}">تعديل</button>
+              <button class="danger" data-delete="${p.id}">حذف</button>
+            </div>
+          </div>
+        `;
+        productList.appendChild(row);
+      }
+      productList.querySelectorAll('[data-delete]').forEach(b=> b.addEventListener('click', e=>{ deleteProduct(e.target.dataset.delete); }))
+      productList.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', e=>{ openEdit(Number(e.target.dataset.edit)); }))
+    }
+
+    // ---------- إضافة منتج من لوحة الإدارة (مع رفع صورة) ----------
+    btnAdd.addEventListener('click', ()=>{
+      if(!isAdmin){ alert('سجل الدخول كمدير أولاً'); return }
+      const title = pTitle.value.trim(); const price = pPrice.value; const desc = pDesc.value.trim();
+      if(!title || !price){ alert('الرجاء إدخال اسم وسعر المنتج'); return }
+      // if image selected, read it
+      const file = pImage.files[0];
+      if(file){ const reader = new FileReader(); reader.onload = ()=>{ addProduct({title,price,desc,img:reader.result}); clearAddForm(); }; reader.readAsDataURL(file); }
+      else{ addProduct({title,price,desc,img:''}); clearAddForm(); }
+    });
+
+    function clearAddForm(){ pTitle.value=''; pPrice.value=''; pDesc.value=''; pImage.value=''; }
+
+    // ---------- تعديل منتج ----------
+    function openEdit(id){
+      const p = products.find(x=>x.id==id); if(!p) return;
+      if(!isAdmin){ alert('سجل الدخول كمدير'); return }
+      const newTitle = prompt('اسم المنتج:', p.title); if(newTitle===null) return;
+      const newPrice = prompt('السعر:', p.price); if(newPrice===null) return;
+      const newDesc = prompt('الوصف:', p.desc); if(newDesc===null) return;
+      // لا نغير الصورة هنا لتبسيط الواجهة
+      updateProduct(id,{title:newTitle,price:Number(newPrice),desc:newDesc});
+    }
+
+    // ---------- البحث والفرز ----------
+    searchInput.addEventListener('input', renderProducts);
+    sortSelect.addEventListener('change', renderProducts);
+
+    // ---------- عربة التسوق ----------
+    function addToCart(id, qty=1){
+      const p = products.find(x=>x.id==id); if(!p) return alert('المنتج غير موجود');
+      cart[id] = (cart[id] || 0) + qty; saveCart(); renderCart(); showCart();
+    }
+
+    function changeQty(id, delta){ cart[id] = (cart[id]||0) + delta; if(cart[id] <=0) delete cart[id]; saveCart(); renderCart(); }
+    function removeFromCart(id){ delete cart[id]; saveCart(); renderCart(); }
+    function clearCart(){ if(confirm('تفريغ العربة؟')){ cart={}; saveCart(); renderCart(); }}
+
+    btnOpenCart.addEventListener('click', ()=>{ showCart(); });
+    btnCloseCart.addEventListener('click', ()=>{ hideCart(); });
+    btnClearCart.addEventListener('click', ()=> clearCart());
+
+    function renderCart(){
+      cartItemsEl.innerHTML=''; let total=0; const ids = Object.keys(cart);
+      if(ids.length===0){ cartItemsEl.innerHTML='<div class="muted">العربة فارغة</div>'; cartTotalEl.textContent='0'; return }
+      for(const id of ids){ const p=products.find(x=>x.id==id); if(!p) continue; const qty = cart[id]; const line = p.price*qty; total+=line;
+        const row = document.createElement('div'); row.className='cart-row';
+        row.innerHTML = `
+          <div style="flex:1">
+            <div><strong>${escapeHtml(p.title||'')}</strong></div>
+            <div class="muted">${formatNumber(p.price)} × ${qty} = ${formatNumber(line)}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn-ghost" data-dec="${id}">-</button>
+            <button class="btn-ghost" data-inc="${id}">+</button>
+            <button class="btn-ghost" data-rem="${id}">حذف</button>
+          </div>
+        `;
+        cartItemsEl.appendChild(row);
+      }
+      cartTotalEl.textContent = formatNumber(total);
+      // أحداث
+      cartItemsEl.querySelectorAll('[data-dec]').forEach(b=> b.addEventListener('click', e=> changeQty(e.target.dataset.dec, -1)));
+      cartItemsEl.querySelectorAll('[data-inc]').forEach(b=> b.addEventListener('click', e=> changeQty(e.target.dataset.inc, 1)));
+      cartItemsEl.querySelectorAll('[data-rem]').forEach(b=> b.addEventListener('click', e=> removeFromCart(e.target.dataset.rem)));
+    }
+
+    function showCart(){ cartBar.style.display='block'; renderCart(); }
+    function hideCart(){ cartBar.style.display='none'; }
+
+    btnCheckout.addEventListener('click', ()=>{
+      if(Object.keys(cart).length===0){ alert('العربة فارغة'); return }
+      // محاكاة: نعرض ملخص ونفرغ العربة
+      let lines = [];
+      let total=0;
+      for(const id in cart){ const p = products.find(x=>x.id==id); if(!p) continue; const qty = cart[id]; const line = p.price*qty; total+=line; lines.push(`${p.title} × ${qty} = ${formatNumber(line)}`); }
+      if(confirm('تأكيد الطلب؟
+' + lines.join('
+') + '
+المجموع: ' + formatNumber(total))){ alert('تمت المحاكاة: شكرًا لك'); cart={}; saveCart(); renderCart(); hideCart(); }
+    });
+
+    // ---------- تسجيل الدخول كمدير ----------
+    btnToggleAdmin.addEventListener('click', ()=>{ adminPanel.style.display = adminPanel.style.display==='none' ? 'block':'none'; adminPanel.setAttribute('aria-hidden', adminPanel.style.display==='none'); });
+
+    btnLogin.addEventListener('click', ()=>{
+      const val = adminPassInput.value || '';
+      const stored = JSON.parse(localStorage.getItem(STORAGE_ADMIN) || '{}');
+      if(stored.pass && btoa(val) === stored.pass){ isAdmin = true; adminControls.style.display='block'; btnLogout.style.display='inline-block'; btnLogin.style.display='none'; alert('تم تسجيل الدخول'); renderAll(); }
+      else{ alert('كلمة المرور غير صحيحة'); }
+    });
+
+    btnLogout.addEventListener('click', ()=>{ isAdmin=false; adminControls.style.display='none'; btnLogout.style.display='none'; btnLogin.style.display='inline-block'; adminPassInput.value=''; renderAll(); });
+
+    btnChangePass.addEventListener('click', ()=>{
+      const np = newPass.value.trim(); if(!np) return alert('أدخل كلمة مرور جديدة'); const data = {pass: btoa(np)}; localStorage.setItem(STORAGE_ADMIN, JSON.stringify(data)); newPass.value=''; alert('تم تغيير كلمة المرور');
+    });
+
+    btnClearProducts.addEventListener('click', clearProducts);
+
+    // ---------- تصدير / استيراد ----------
+    btnExport.addEventListener('click', ()=>{
+      const data = {products,admin: JSON.parse(localStorage.getItem(STORAGE_ADMIN)||'{}')};
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = 'store-export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    btnImport.addEventListener('click', ()=> importFile.click());
+    importFile.addEventListener('change', async (e)=>{
+      const file = e.target.files[0]; if(!file) return; try{ const txt = await file.text(); const obj = JSON.parse(txt);
+        if(Array.isArray(obj.products)){ if(confirm('استيراد سيستبدل منتجات الموجودة. تابع؟')){ products = obj.products; saveProducts(); if(obj.admin) localStorage.setItem(STORAGE_ADMIN, JSON.stringify(obj.admin)); renderAll(); alert('تم الاستيراد'); } }
+        else alert('الملف لا يحتوي على بيانات صالحة');
+      }catch(err){ alert('فشل في قراءة الملف'); }
+      importFile.value='';
+    });
+
+    // ---------- مساعدات ----------
+    function formatNumber(n){ return (typeof n === 'number' ? n.toFixed(2) : Number(n).toFixed(2)) + ' '; }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]; }); }
+
+    // ---------- واجهة التحرير السريعة من لوحة الإدارة ----------
+    function openEditPrompt(id){ openEdit(id); }
+
+    // ---------- تحميل البيانات الأولية (إن وُجدت) ----------
+    renderAll(); renderAdminList();
+
+    // إذا كان هناك منتجات سابقة في localStorage، ستظهر. هذا الملف جاهز للرفع على GitHub Pages.
+
+    /*
+      تعليمات النشر على GitHub Pages:
+      1) ضع هذا الملف باسم index.html داخل مجلد جديد.
+      2) افتح طرفية وادخل المجلد ثم نفذ:
+         git init
+         git add index.html
+         git commit -m "Initial: store"
+         git branch -M main
+         git remote add origin https://github.com/<USERNAME>/<REPO>.git
+         git push -u origin main
+      3) في GitHub: Settings -> Pages: اختر Branch = main , Folder = / (root) ثم Save
+      4) ستحصل على رابط النشر مثل: https://<USERNAME>.github.io/<REPO>/
+
+      ملاحظات أمنية:
+      - كلمة المرور مخزنة بطريقة Base64 (btoa) فقط للحماية على مستوى الواجهة — ليست آمنة لتخزين حقيقي. لمنتج حقيقي استخدم backend وauth آمن.
+      - الصور مخزنة بصيغة Base64 في localStorage — قد يصل حجم التخزين إلى حد المتصفح، لذا للمتاجر الحقيقية استخدم رفع ملفات إلى سيرفر أو خدمة تخزين سحابي.
+    */
+
   </script>
 </body>
 </html>
