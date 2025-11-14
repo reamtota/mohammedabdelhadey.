@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>متجر احترافي</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f7f7f7;
+    }
+
+    header {
+      background: #111827;
+      padding: 20px;
+      color: white;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .product {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .product img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    .product button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #cart {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: white;
+      padding: 20px;
+      width: 260px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #cart h3 {
+      margin-top: 0;
+    }
+
+    #cart ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #cart li {
+      padding: 6px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #checkoutBtn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 10px;
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>متجر احترافي جاهز</header>
+
+  <div id="cart">
+    <h3>سلة المشتريات</h3>
+    <ul id="cartItems"></ul>
+    <p><strong>الإجمالي:</strong> <span id="total">0</span> $</p>
+    <button id="checkoutBtn">إتمام الطلب</button>
+  </div>
+
+  <section class="products">
+    <div class="product">
+      <img src="https://via.placeholder.com/300" />
+      <h3>منتج 1</h3>
+      <p>السعر: 10$</p>
+      <button onclick="addToCart('منتج 1', 10)">أضف إلى السلة</button>
+    </div>
+
+    <div class="product">
+      <img src="https://via.placeholder.com/300" />
+      <h3>منتج 2</h3>
+      <p>السعر: 20$</p>
+      <button onclick="addToCart('منتج 2', 20)">أضف إلى السلة</button>
+    </div>
+
+    <div class="product">
+      <img src="https://via.placeholder.com/300" />
+      <h3>منتج 3</h3>
+      <p>السعر: 30$</p>
+      <button onclick="addToCart('منتج 3', 30)">أضف إلى السلة</button>
+    </div>
+  </section>
+
+  <script>
+    let cart = [];
+
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      updateCart();
+    }
+
+    function updateCart() {
+      const cartItems = document.getElementById("cartItems");
+      const total = document.getElementById("total");
+
+      cartItems.innerHTML = "";
+      let sum = 0;
+
+      cart.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = `${item.name} - ${item.price}$`;
+        cartItems.appendChild(li);
+        sum += item.price;
+      });
+
+      total.textContent = sum;
+    }
+
+    document.getElementById("checkoutBtn").onclick = () => {
+      alert("شكراً لك! سيتم التواصل لإتمام الطلب.");
+    };
+  </script>
+</body>
+</html>
