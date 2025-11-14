@@ -51,5 +51,5 @@
 
 ## ⭐ شكرًا لزيارتكم!
 
-نقدّر ثقتكم في Mohammed Abd Elhadey Store On Liney  ونتطلع لمساعدتكم في إنجاز أعمالكم الإبداعية بأفضل جودة ممكنة.
+  Mohammed Abd Elhadey Store On Liney 
 
